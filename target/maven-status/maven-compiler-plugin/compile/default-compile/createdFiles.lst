@@ -1,0 +1,9 @@
+com\tasktracker\repository\ITaskRepository.class
+com\tasktracker\model\Status.class
+com\tasktracker\repository\TaskRepository$2.class
+com\tasktracker\Main.class
+com\tasktracker\services\ITaskService.class
+com\tasktracker\services\TaskService.class
+com\tasktracker\model\Task.class
+com\tasktracker\repository\TaskRepository.class
+com\tasktracker\repository\TaskRepository$1.class
