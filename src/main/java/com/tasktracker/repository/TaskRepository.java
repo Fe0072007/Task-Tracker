@@ -203,7 +203,6 @@ public class TaskRepository implements ITaskRepository {
         }
     }
 
-
     @Override
     public List<Task> list() {
         try{

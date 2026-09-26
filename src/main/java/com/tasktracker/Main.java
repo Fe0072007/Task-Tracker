@@ -1,11 +1,13 @@
 package com.tasktracker;
 
+import com.tasktracker.cli.AddCommand;
+import com.tasktracker.cli.CommandParser;
+import com.tasktracker.cli.DeleteCommand;
+import com.tasktracker.cli.ListCommand;
+import com.tasktracker.cli.UpdateCommand;
 import com.tasktracker.services.ITaskService;
 import com.tasktracker.services.TaskService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import java.io.IOException;
 
 
 
@@ -13,167 +15,99 @@ public class Main {
     public static void main(String[] args) {
 
         ITaskService _taskService = new TaskService();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        // ObjectMapper objectMapper = new ObjectMapper();
+        // objectMapper.registerModule(new JavaTimeModule());
 
-        if(args.length == 0){
-            System.out.println("Use: task-cli <command>\nDigite -help para exibir os comandos");
-            return;
+        CommandParser parser = new CommandParser();
 
-        }
+        String command = parser.parse(args);
 
-        switch(args[0]){
+        switch(command){
+
             case "-help":
                 String commands[] = {"add <description>", "update <id> <description>", "delete  <id>", "mark-progress <id>", "mark-done <id>", "list-all", "list-done", "list-todo", "list-in-progress"};
 
-                for(String command : commands){
-                    System.out.println(command);
+                for(String item : commands){
+                    System.out.println(item);
                 }
 
                 break;
             case "add":
                 // add <description>
                 // # Output: Task added successfully (ID: 1)
-                var addedTask = _taskService.Add(args[1]);
+                AddCommand addCommand = new AddCommand(_taskService);
 
-                System.out.println("Tarefa adicionada com sucesso");
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(addedTask)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
+                addCommand.execute(args[1]);
 
                 break;
             case "update":
                 // update <id> <description>
 
-                var updatedTask = _taskService.Update(Long.parseLong(args[1]), args[2]);
+                UpdateCommand updateCommand = new UpdateCommand(_taskService);
 
-                System.out.println("Tarefa atualizada com sucesso");
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(updatedTask)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
+                updateCommand.execute(Long.parseLong(args[1]), args[2]);
 
                 break;
             case "delete":
                 // delete <id>
 
-                if(_taskService.Delete(Long.parseLong(args[1]))){
-                    System.out.println("Tarefa deletada com sucesso!");
-                }
+                DeleteCommand deleteCommand = new DeleteCommand(_taskService);
+
+                deleteCommand.execute(Long.parseLong(args[1]));
 
                 break;
             case "mark-progress":
                 // mark-progress <id>
 
-                var inProgressTask = _taskService.MarkProgress(Long.parseLong(args[1]));
+                UpdateCommand progressCommand = new UpdateCommand(_taskService);
 
-                System.out.println("Tarefa atualizada com sucesso");
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(inProgressTask)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
+                progressCommand.executeProgress(Long.parseLong(args[1]));
 
                 break;
-            case "mark-done":
+            case "mark-done": 
                 // mark-done <id>
 
-                var doneTask = _taskService.MarkDone(Long.parseLong(args[1]));
+                UpdateCommand doneTask = new UpdateCommand(_taskService);
 
-                System.out.println("Tarefa atualizada com sucesso");
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(doneTask)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
+                doneTask.executeDone(Long.parseLong(args[1]));
 
                 break;
             case "list-all":
                 // list-all
 
-                var tasks = _taskService.List();
+                ListCommand listAllCommand = new ListCommand(_taskService);
 
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(tasks)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-
+                listAllCommand.execute();
 
                 break;
             case "list-done":
                 // list-done
 
-                var doneTasks = _taskService.ListDone();
+                ListCommand listDoneCommand = new ListCommand(_taskService);
 
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(doneTasks)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
+                listDoneCommand.executeDone();
 
                 break;
             case "list-todo":
                 // list-todo
 
-                var toDoTasks = _taskService.ListTodo();
+                ListCommand listToDoCommand = new ListCommand(_taskService);
 
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(toDoTasks)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
+                listToDoCommand.executeToDo();
 
                 break;
             case "list-in-progress":
                 // list-in-progress
 
-                var inProgressTasks = _taskService.ListInProgress();
+                ListCommand listProgressCommand = new ListCommand(_taskService);
 
-                try{
-                    System.out.println(
-                        objectMapper
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(inProgressTasks)
-                    );
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
+                listProgressCommand.executeInProgress();
 
                 break;
             default:
+
                 System.out.println("Use: task-cli <command>\nDigite -help para exibir os comandos");
+        
         }
     }
 }
