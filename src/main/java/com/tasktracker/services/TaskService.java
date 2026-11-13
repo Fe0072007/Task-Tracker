@@ -100,6 +100,7 @@ public class TaskService implements ITaskService{
         if (!tasks.isEmpty()){
             return tasks;
         } else {
+            System.out.println("Nenhuma tarefa para ser listada");
             return null;
         }
 
@@ -113,6 +114,7 @@ public class TaskService implements ITaskService{
         if (!tasks.isEmpty()){
             return tasks;
         } else {
+            System.out.println("Nenhuma tarefa para ser listada");
             return null;
         }
 
@@ -126,6 +128,7 @@ public class TaskService implements ITaskService{
         if (!tasks.isEmpty()){
             return tasks;
         } else {
+            System.out.println("Nenhuma tarefa para ser listada");
             return null;
         }
 
@@ -139,6 +142,7 @@ public class TaskService implements ITaskService{
         if (!tasks.isEmpty()){
             return tasks;
         } else {
+            System.out.println("Nenhuma tarefa para ser listada");
             return null;
         }
 
