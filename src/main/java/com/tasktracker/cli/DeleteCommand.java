@@ -2,15 +2,17 @@ package com.tasktracker.cli;
 
 import com.tasktracker.services.ITaskService;
 
-public class DeleteCommand {
+public class DeleteCommand extends Command{
     
     private final ITaskService _taskService;
+    private final long id;
     
-    public DeleteCommand(ITaskService taskService){
+    public DeleteCommand(ITaskService taskService, long id){
         this._taskService = taskService;
+        this.id = id;
     }
 
-    public void execute(long id){
+    public void execute(){
 
         _taskService.Delete(id);
 
