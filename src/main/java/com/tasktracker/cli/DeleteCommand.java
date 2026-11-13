@@ -14,7 +14,7 @@ public class DeleteCommand extends Command{
 
     public void execute(){
 
-        _taskService.Delete(id);
+        if(!_taskService.Delete(id)) return;
 
         System.out.println("Tarefa excluída com sucesso");
 

@@ -12,6 +12,8 @@ D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\cli\M
 D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\cli\UpdateCommand.java
 D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\cli\VersionCommand.java
 D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\Main.java
+D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\model\Exceptions\EmptyException.java
+D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\model\Exceptions\NotFoundException.java
 D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\model\Status.java
 D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\model\Task.java
 D:\Users\ACER\Desktop\Java Projects\task-cli\src\main\java\com\tasktracker\repository\ITaskRepository.java
