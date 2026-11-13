@@ -1,13 +1,15 @@
 package com.tasktracker.repository;
 
 import com.tasktracker.model.Task;
+import com.tasktracker.model.Exceptions.EmptyException;
+import com.tasktracker.model.Exceptions.NotFoundException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,7 +85,7 @@ public class TaskRepository implements ITaskRepository {
     }
 
     @Override
-    public Task update(long id, Status status){
+    public Task update(long id, Status status) throws NotFoundException, EmptyException{
         Path filePath = createJSON();
         Task task = null;
 
@@ -91,10 +93,10 @@ public class TaskRepository implements ITaskRepository {
 
             List<Task> tasks = list();
 
-            if(tasks.isEmpty()){
-                System.out.println("Não existe nenhuma tarefa para ser modificada");
-                return null;
-            }
+            if(tasks.isEmpty())
+                throw new EmptyException(
+                    "Não existe nenhuma tarefa para ser modificada");
+            
 
             boolean found = false;
 
@@ -103,18 +105,21 @@ public class TaskRepository implements ITaskRepository {
                     found = true;
                     task = tasks.get(i);
                     task.setStatus(status);
-                    task.setUpdatedAt(LocalDate.now());
+                    task.setUpdatedAt(OffsetDateTime.now());
                     tasks.set(i, task);
 
                     break;
                 }
             }
 
-            if(!found){ System.out.println("Tarefa não encontrada"); return null; }
+            if(!found) 
+                throw new NotFoundException(
+                            "Error: Nenhuma tarefa com ID: "+ id + " encontrada");  
 
             objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .writeValue(filePath.toFile(), tasks);
+                
             
             return task;
 
@@ -126,7 +131,7 @@ public class TaskRepository implements ITaskRepository {
     }
 
     @Override
-    public Task update(long id, String description){
+    public Task update(long id, String description) throws EmptyException, NotFoundException{
         Path filePath = createJSON();
         Task task = null;
 
@@ -135,8 +140,7 @@ public class TaskRepository implements ITaskRepository {
             List<Task> tasks = list();
 
             if(tasks.isEmpty()){
-                System.out.println("Não existe nenhuma tarefa para ser modificada");
-                return null;
+                throw new EmptyException("Não existe nenhuma tarefa para ser modificada");
             }
 
             boolean found = false;
@@ -146,12 +150,15 @@ public class TaskRepository implements ITaskRepository {
                     found = true;
                     task = tasks.get(i);
                     task.setDescription(description);
-                    task.setUpdatedAt(LocalDate.now());
+                    task.setUpdatedAt(OffsetDateTime.now());
                     tasks.set(i, task);
                 }
             }
 
-            if(!found){ System.out.println("Tarefa não encontrada"); return null; }
+            if(!found)
+                throw new NotFoundException(
+                            "Error: Nenhuma tarefa com ID: "+ id + " encontrada"); 
+            
 
             objectMapper
                 .writerWithDefaultPrettyPrinter()
@@ -167,17 +174,17 @@ public class TaskRepository implements ITaskRepository {
     }
 
     @Override
-    public List<Task> delete(long id) {
+    public List<Task> delete(long id) throws EmptyException, NotFoundException {
         Path filePath = createJSON();
 
         try{
 
             List<Task> tasks = list();
 
-            if(tasks.isEmpty()){
-                System.out.println("Não existe nenhuma tarefa para ser deletada");
-                return null;
-            }
+            if(tasks.isEmpty())
+                throw new EmptyException(
+                    "Nenhuma tarefa para ser deletada");
+            
 
             boolean found = false;
 
@@ -189,7 +196,10 @@ public class TaskRepository implements ITaskRepository {
                 }
             }
 
-            if(!found){ System.out.println("Tarefa não encontrada"); return null; }
+            if(!found)
+                throw new NotFoundException(
+                        "Error: Nenhuma tarefa com ID: "+ id + " encontrada");
+             
 
             objectMapper
                     .writerWithDefaultPrettyPrinter()
@@ -212,7 +222,7 @@ public class TaskRepository implements ITaskRepository {
                 filePath.toFile(),
                 new TypeReference<List<Task>>() {}
             );
-
+            
             return tasks;
 
         } catch (IOException e) {
@@ -222,7 +232,7 @@ public class TaskRepository implements ITaskRepository {
     }
 
     @Override
-    public List<Task> list(Status status){
+    public List<Task> list(Status status) {
         try{
             Path filePath = createJSON();
 

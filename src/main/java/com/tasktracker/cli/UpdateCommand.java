@@ -2,34 +2,24 @@ package com.tasktracker.cli;
 
 import com.tasktracker.services.ITaskService;
 
-public class UpdateCommand{
+public class UpdateCommand extends Command{
 
     private final ITaskService _taskService;
+    private final long id;
+    private final String description;
 
-    public UpdateCommand(ITaskService taskService){
+    public UpdateCommand(ITaskService taskService, long id, String description){
         this._taskService = taskService;
+        this.id = id;
+        this.description = description;
     }
     
-    public void execute(long id, String description){
+    public void execute(){
 
         var task = _taskService.Update(id, description);
 
         System.out.println("Tarefa "+ task.getId() +" atualizada com sucesso");
 
     }
-    
-    public void executeProgress(long id){
-        var task = _taskService.MarkProgress(id);
 
-        System.out.println("Tarefa "+ task.getId()+" marcada como em progresso");
-
-    }
-
-    public void executeDone(long id){
-
-        var task = _taskService.MarkDone(id);
-
-        System.out.println("Tarefa "+task.getId()+" marcada como feita");
-
-    }
 }

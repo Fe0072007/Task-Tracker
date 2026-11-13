@@ -1,13 +1,13 @@
 package com.tasktracker.model;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 public class Task {
 
     private long id;
     private String description;
-	private LocalDate createdAt;
-    private LocalDate updatedAt;
+	private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
     private Status status;
 
     public long getId() {
@@ -26,19 +26,19 @@ public class Task {
         this.description = description;
     }
 
-    public LocalDate getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDate getUpdatedAt() {
+    public OffsetDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDate updatedAt) {
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -56,8 +56,8 @@ public class Task {
         this.id = id;
         this.description = description;
         status = Status.TODO;
-        this.createdAt = LocalDate.now();
-        this.updatedAt = LocalDate.now();
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
     }
 
 
