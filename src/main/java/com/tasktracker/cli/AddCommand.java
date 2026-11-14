@@ -16,6 +16,8 @@ public class AddCommand extends Command{
 
         var task = _taskService.Add(description);
 
+        if(task == null) return;
+
         System.out.println("Task adicionada com sucesso (ID: "+ task.getId() +")");
     }
 

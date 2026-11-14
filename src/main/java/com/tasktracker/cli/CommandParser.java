@@ -1,13 +1,28 @@
 package com.tasktracker.cli;
 
 import com.tasktracker.services.ITaskService;
-import com.tasktracker.services.TaskService;
 
-public class CommandParser extends Command{
+public class CommandParser{
 
-    private final ITaskService _taskService = new TaskService();
+    private final ITaskService _taskService;
+
+    public CommandParser(ITaskService taskService){
+        this._taskService = taskService;
+    }
+
+    public void InvalidCommand(String message){
+        System.out.printf("""
+            
+            Erro: %s
+
+            Use --help para checar os comandos.
+                
+        """, message);
+    }
     
     public Command parse(String[] args){
+
+        long id;
 
         if(args.length == 0) return new HelpCommand();
 
@@ -41,16 +56,41 @@ public class CommandParser extends Command{
                     return null;
                 }
 
-                return new UpdateCommand(_taskService, Long.parseLong(args[1]), args[2]);
+                try{
+                    id = Long.parseLong(args[1]);
+                } catch(NumberFormatException ex){
+                    InvalidCommand("O ID deve ser um número");
+                    return null;
+                }
+
+                if(id <=0){
+                    InvalidCommand("O ID deve ser maior que 0");
+                    return null;
+                }
+
+                return new UpdateCommand(_taskService, id, args[2]);
 
             case "delete":
                 // delete <id>
+
                 if (args.length < 2){
                     InvalidCommand("Insira o ID da tarefa");
                     return null;
                 }
+
+                try{
+                    id = Long.parseLong(args[1]);
+                } catch(NumberFormatException ex){
+                    InvalidCommand("O ID deve ser um número");
+                    return null;
+                }
+
+                if(id <=0){
+                    InvalidCommand("O ID deve ser maior que 0");
+                    return null;
+                }
                 
-                return new DeleteCommand(_taskService, Long.parseLong(args[1]));
+                return new DeleteCommand(_taskService, id);
 
             case "mark-progress":
                 // mark-progress <id>
@@ -59,7 +99,19 @@ public class CommandParser extends Command{
                     return null;
                 }
 
-                return new MarkProgressCommand(_taskService, Long.parseLong(args[1]));
+                try{
+                    id = Long.parseLong(args[1]);
+                } catch(NumberFormatException ex){
+                    InvalidCommand("O ID deve ser um número");
+                    return null;
+                }
+
+                if(id <=0){
+                    InvalidCommand("O ID deve ser maior que 0");
+                    return null;
+                }
+
+                return new MarkProgressCommand(_taskService, id);
 
             case "mark-done": 
                 // mark-done <id>
@@ -69,7 +121,19 @@ public class CommandParser extends Command{
                     return null;
                 }
 
-                return new MarkDoneCommand(_taskService, Long.parseLong(args[1]));
+                try{
+                    id = Long.parseLong(args[1]);
+                } catch(NumberFormatException ex){
+                    InvalidCommand("O ID deve ser um número");
+                    return null;
+                }
+
+                if(id <=0){
+                    InvalidCommand("O ID deve ser maior que 0");
+                    return null;
+                }
+
+                return new MarkDoneCommand(_taskService, id);
 
             case "list-all":
                 // list-all

@@ -19,7 +19,7 @@ public class HelpCommand extends Command{
                   list-in-progress                List in progress tasks
                   list-all                        List all tasks
                   update <id> <description>       Update a task
-                  mark-in-progress <id>           Mark task as in progress
+                  mark-progress <id>              Mark task as in progress
                   mark-done <id>                  Mark task as done
                   delete <id>                     Delete a task
                 

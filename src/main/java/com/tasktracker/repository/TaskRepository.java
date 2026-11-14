@@ -3,12 +3,14 @@ package com.tasktracker.repository;
 import com.tasktracker.model.Task;
 import com.tasktracker.model.Exceptions.EmptyException;
 import com.tasktracker.model.Exceptions.NotFoundException;
+import com.tasktracker.model.Exceptions.PersistenceException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,18 +22,27 @@ import com.tasktracker.model.Status;
 public class TaskRepository implements ITaskRepository {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Path directory;
 
     public TaskRepository() {
+        this(defaultDirectory());
+    }
+
+    public TaskRepository(Path directory) {
+        this.directory = java.util.Objects.requireNonNull(directory);
         objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    private static Path defaultDirectory() {
+        String appData = System.getenv("APPDATA");
+        return (appData == null || appData.isBlank())
+            ? Paths.get(System.getProperty("user.home"), "TaskCLI")
+            : Paths.get(appData, "TaskCLI");
     }
 
     @Override 
     public Path createJSON(){
         try{
-            String appData = System.getenv("APPDATA");
-
-            Path directory = Paths.get(appData, "TaskCLI");
-
             Files.createDirectories(directory);
 
             Path filePath = directory.resolve("tasks.json");
@@ -47,12 +58,45 @@ public class TaskRepository implements ITaskRepository {
             return filePath;
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new PersistenceException("Não foi possível acessar o arquivo de tarefas.", e);
         }
         
     }
 
+    private void saveTasks(Path filePath, List<Task> tasks) throws IOException{
+
+        Path temp = null;
+        IOException failure = null;
+    
+        try{
+            Path directory = filePath.getParent();
+
+            temp = Files.createTempFile(directory, "tasks-", ".tmp");
+
+            objectMapper.
+                writerWithDefaultPrettyPrinter().
+                writeValue(temp.toFile(), tasks);
+            
+            Files.move(temp, filePath, StandardCopyOption.ATOMIC_MOVE);
+
+        } catch (IOException ex) {
+            failure = ex;
+            throw ex;
+        } finally {
+            if (temp != null) {
+                try {
+                    Files.deleteIfExists(temp);
+                } catch (IOException cleanupEx) {
+                    if (failure != null) {
+                        failure.addSuppressed(cleanupEx);
+                    } else {
+                        throw cleanupEx;
+                    }
+                }
+            }
+        }
+
+    }
     @Override
     public Task add(String description) {
         
@@ -63,6 +107,7 @@ public class TaskRepository implements ITaskRepository {
 
             List<Task> tasks = list();
 
+            // nextId pode não corresponder à sequência correta de id Ex.: IDs = [1, 2, 3], caso 3 seja deletado e seja adicionada uma nova task seu id será 3
             long nextId = tasks.stream()
                 .mapToLong(Task::getId)
                 .max()
@@ -72,26 +117,26 @@ public class TaskRepository implements ITaskRepository {
 
             tasks.add(newTask);
 
-            objectMapper
-                .writerWithDefaultPrettyPrinter()
-                .writeValue(filePath.toFile(), tasks);
+            saveTasks(filePath, tasks);
             
             return newTask;
 
         }catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new PersistenceException("Não foi possível salvar as tarefas.", e);
         }
     }
 
     @Override
     public Task update(long id, Status status) throws NotFoundException, EmptyException{
+
         Path filePath = createJSON();
+
         Task task = null;
 
         try{
 
             List<Task> tasks = list();
+
 
             if(tasks.isEmpty())
                 throw new EmptyException(
@@ -116,17 +161,14 @@ public class TaskRepository implements ITaskRepository {
                 throw new NotFoundException(
                             "Error: Nenhuma tarefa com ID: "+ id + " encontrada");  
 
-            objectMapper
-                .writerWithDefaultPrettyPrinter()
-                .writeValue(filePath.toFile(), tasks);
+            saveTasks(filePath, tasks);
                 
             
             return task;
 
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new PersistenceException("Não foi possível salvar as tarefas.", e);
         }
     }
 
@@ -138,6 +180,7 @@ public class TaskRepository implements ITaskRepository {
         try{
 
             List<Task> tasks = list();
+
 
             if(tasks.isEmpty()){
                 throw new EmptyException("Não existe nenhuma tarefa para ser modificada");
@@ -160,16 +203,13 @@ public class TaskRepository implements ITaskRepository {
                             "Error: Nenhuma tarefa com ID: "+ id + " encontrada"); 
             
 
-            objectMapper
-                .writerWithDefaultPrettyPrinter()
-                .writeValue(filePath.toFile(), tasks);
+            saveTasks(filePath, tasks);
             
             return task;
 
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new PersistenceException("Não foi possível salvar as tarefas.", e);
         }
     }
 
@@ -180,6 +220,7 @@ public class TaskRepository implements ITaskRepository {
         try{
 
             List<Task> tasks = list();
+
 
             if(tasks.isEmpty())
                 throw new EmptyException(
@@ -201,15 +242,12 @@ public class TaskRepository implements ITaskRepository {
                         "Error: Nenhuma tarefa com ID: "+ id + " encontrada");
              
 
-            objectMapper
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValue(filePath.toFile(), tasks);
+            saveTasks(filePath, tasks);
             
             return tasks; 
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new PersistenceException("Não foi possível salvar as tarefas.", e);
         }
     }
 
@@ -226,8 +264,7 @@ public class TaskRepository implements ITaskRepository {
             return tasks;
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new PersistenceException("Não foi possível ler o arquivo de tarefas.", e);
         }
     }
 
@@ -252,8 +289,7 @@ public class TaskRepository implements ITaskRepository {
             return listStatus;
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new PersistenceException("Não foi possível ler o arquivo de tarefas.", e);
         }
     }
 

@@ -4,17 +4,25 @@ import com.tasktracker.model.Task;
 import com.tasktracker.model.Exceptions.EmptyException;
 import com.tasktracker.model.Exceptions.NotFoundException;
 import com.tasktracker.repository.ITaskRepository;
-import com.tasktracker.repository.TaskRepository;
 import com.tasktracker.model.Status;
 
 import java.util.List;
 
 public class TaskService implements ITaskService{
 
-    ITaskRepository _taskRepository = new TaskRepository();
+    private final ITaskRepository _taskRepository;
+
+    public TaskService(ITaskRepository taskRepository){
+        this._taskRepository = taskRepository;
+    }
 
     @Override
     public Task Add(String description) {
+
+        if (description == null || description.isBlank()){
+            System.out.println("A descrição da tarefa não pode estar vazia");
+            return null; 
+        }
 
         Task task = _taskRepository.add(description);
         if (task != null){
@@ -28,12 +36,20 @@ public class TaskService implements ITaskService{
     @Override
     public Task Update(long id, String description) {
         try {
+
+            if (description == null || description.isBlank()){
+                System.out.println("A descrição da tarefa não pode estar vazia");
+                return null;
+            }
+
             Task task = _taskRepository.update(id, description);
+
             if (task != null){
                 return task;
             } else {
                 return null;
             }
+
         } catch (EmptyException | NotFoundException ex){
             System.out.println(ex.getMessage());
             return null;
@@ -45,11 +61,7 @@ public class TaskService implements ITaskService{
         try{
             List<Task> tasks = _taskRepository.delete(id);
 
-            if (!tasks.isEmpty()){
-                return true;
-            } else {
-                return false;
-            }
+            return tasks != null;
         } catch (EmptyException | NotFoundException ex){
             System.out.println(ex.getMessage());
             return false;
@@ -97,6 +109,11 @@ public class TaskService implements ITaskService{
         
         List<Task> tasks = _taskRepository.list();
 
+        if(tasks == null) {
+            System.out.println("Não foi possível carregar as tarefas");
+            return null;
+        }
+
         if (!tasks.isEmpty()){
             return tasks;
         } else {
@@ -110,6 +127,11 @@ public class TaskService implements ITaskService{
     public List<Task> ListDone() {
         
         List<Task> tasks = _taskRepository.list(Status.DONE);
+
+        if(tasks == null) {
+            System.out.println("Não foi possível carregar as tarefas");
+            return null;
+        }
 
         if (!tasks.isEmpty()){
             return tasks;
@@ -125,6 +147,11 @@ public class TaskService implements ITaskService{
         
         List<Task> tasks = _taskRepository.list(Status.TODO);
 
+        if(tasks == null) {
+            System.out.println("Não foi possível carregar as tarefas");
+            return null;
+        }
+
         if (!tasks.isEmpty()){
             return tasks;
         } else {
@@ -138,6 +165,11 @@ public class TaskService implements ITaskService{
     public List<Task> ListInProgress() {
         
         List<Task> tasks = _taskRepository.list(Status.IN_PROGRESS);
+
+        if(tasks == null) {
+            System.out.println("Não foi possível carregar as tarefas");
+            return null;
+        }
 
         if (!tasks.isEmpty()){
             return tasks;
