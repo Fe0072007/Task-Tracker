@@ -35,12 +35,94 @@ Também é possível executar pelo Maven:
 mvn compile exec:java -Dexec.args="list-all"
 ```
 
-A ajuda usa `task-cli` como nome da aplicação. Nos exemplos deste README, a
-invocação completa é `java -jar target/task-cli-1.1.1.jar`.
+A execução pelo JAR exige Java instalado. Para usar o comando `task-cli` com
+um runtime incluído, utilize o instalador Windows descrito abaixo.
+
+## Instalador Windows
+
+### Gerar o instalador
+
+O script [build-installer.ps1](build-installer.ps1) compila o projeto, executa
+os testes e gera um instalador `.exe` com o runtime Java incluído.
+
+Na máquina que gera o instalador, são necessários:
+
+- Windows e PowerShell.
+- Maven e um JDK disponíveis para a compilação.
+- `jpackage`, configurado na variável `$jpackage` do script. Atualmente o caminho
+  é `C:\Program Files\Java\jdk-27\bin\jpackage.exe`; ajuste-o se a instalação
+  estiver em outro local. O runtime distribuído vem desse JDK, embora o projeto
+  tenha Java 17 como alvo de compilação.
+- WiX Toolset compatível com o `jpackage` utilizado, disponível no `PATH`, e
+  seus termos aceitos conforme a versão instalada. Consulte a
+  [documentação de aceitação do WiX](https://docs.firegiant.com/wix/osmf/).
+
+Na pasta `task-cli`, execute:
+
+```powershell
+.\build-installer.ps1
+```
+
+Se a política de execução bloquear scripts locais, você pode executar esta
+cópia revisada do script com uma política limitada ao novo processo:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build-installer.ps1
+```
+
+O script executa `mvn clean package`, recria `dist-input` com o JAR e o wrapper
+`task-cli.cmd`, e grava o instalador em `dist-installer`. A pasta `dist-input`
+é descartável: seu conteúdo anterior é removido a cada execução.
+
+Os arquivos em [installer-resources](installer-resources) fornecem o wrapper
+do comando e a personalização WiX que adiciona a pasta `app` da instalação ao
+`PATH` do sistema. Preserve esses recursos ao gerar o pacote.
+
+### Instalar e conferir
+
+1. Localize o `.exe` gerado em `dist-installer` e execute-o.
+2. Conclua o assistente e autorize a elevação solicitada pelo Windows. O script
+   atual gera uma instalação para a máquina e altera o `PATH` do sistema.
+3. Feche e abra novamente o terminal para carregar o `PATH` atualizado.
+4. Confira a instalação:
+
+```powershell
+where.exe task-cli
+task-cli --version
+task-cli --help
+```
+
+Na versão atual, `--version` deve exibir `Task CLI v1.1.1`. O computador que
+recebe o instalador não precisa ter Java ou Maven instalados. O aplicativo é
+usado pelo terminal, passando os comandos descritos abaixo.
+
+Se `task-cli` não for encontrado, verifique se o `PATH` contém a subpasta `app`
+do diretório escolhido no assistente. Ela contém `task-cli.cmd`, que encaminha
+os argumentos para `Task Tracker CLI.exe` na pasta superior. Se estiver usando
+o terminal integrado de uma IDE, reabra a IDE para atualizar o ambiente.
+
+Para desinstalar, use a lista de aplicativos instalados nas Configurações do
+Windows. O JSON de tarefas fica no diretório de dados descrito em
+[Armazenamento](#armazenamento), separado dos arquivos da aplicação.
+
+### Versão do pacote
+
+A versão atual é `1.1.1`, consistente nos seguintes arquivos:
+
+| Arquivo | Definição |
+| --- | --- |
+| `pom.xml` | Versão Maven do projeto: `1.1.1`. |
+| `build-installer.ps1` | `$version = "1.1.1"`, usada no nome do JAR e em `--app-version`. |
+| `VersionCommand.java` | Versão apresentada por `--version`: `1.1.1`. |
+
+O template `installer-resources/main.wxs` recebe a versão do `jpackage` pela
+variável `JpAppVersion`; ele não mantém outra versão fixa. Ao publicar uma nova
+versão, atualize as três definições acima e os exemplos deste README.
 
 ## Comandos
 
-Acrescente um dos comandos abaixo à invocação do JAR:
+Após instalar, use `task-cli` seguido de um dos comandos abaixo. Para executar
+pelo JAR, substitua `task-cli` por `java -jar target/task-cli-1.1.1.jar`.
 
 | Comando | Ação |
 | --- | --- |
@@ -59,13 +141,15 @@ Acrescente um dos comandos abaixo à invocação do JAR:
 Exemplo de uso; substitua `1` pelo ID retornado ao adicionar:
 
 ```sh
-java -jar target/task-cli-1.1.1.jar add "Estudar Java"
-java -jar target/task-cli-1.1.1.jar update 1 "Estudar Java e Maven"
-java -jar target/task-cli-1.1.1.jar mark-progress 1
-java -jar target/task-cli-1.1.1.jar list-in-progress
-java -jar target/task-cli-1.1.1.jar mark-done 1
-java -jar target/task-cli-1.1.1.jar list-done
-java -jar target/task-cli-1.1.1.jar delete 1
+task-cli add "Estudar Java"
+task-cli list-all
+task-cli update 1 "Estudar Java e Maven"
+task-cli list-todo
+task-cli mark-progress 1
+task-cli list-in-progress
+task-cli mark-done 1
+task-cli list-done
+task-cli delete 1
 ```
 
 Use aspas em descrições com espaços. Descrições vazias ou compostas apenas por
