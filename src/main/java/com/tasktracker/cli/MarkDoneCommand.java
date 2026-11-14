@@ -16,6 +16,8 @@ public class MarkDoneCommand extends Command{
 
         var task = _taskService.MarkDone(id);
 
+        if (task == null) return;
+
         System.out.println("Tarefa "+task.getId()+" marcada como feita");
 
     }

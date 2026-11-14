@@ -18,6 +18,8 @@ public class UpdateCommand extends Command{
 
         var task = _taskService.Update(id, description);
 
+        if (task == null) return;
+
         System.out.println("Tarefa "+ task.getId() +" atualizada com sucesso");
 
     }

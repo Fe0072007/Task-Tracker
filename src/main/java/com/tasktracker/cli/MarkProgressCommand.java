@@ -18,6 +18,8 @@ public class MarkProgressCommand extends Command{
 
         var task = _taskService.MarkProgress(id);
 
+        if (task == null) return;
+
         System.out.println("Tarefa "+ task.getId()+" marcada como em progresso");
 
     }
