@@ -4,6 +4,8 @@ Aplicação de terminal para gerenciar tarefas, desenvolvida em Java 17 com Mave
 Permite adicionar, atualizar, excluir e listar tarefas, além de marcar seu progresso.
 Os dados são armazenados localmente em JSON usando Jackson.
 
+Projeto baseado no desafio [Task Tracker do roadmap.sh](https://roadmap.sh/projects/task-tracker).
+
 ## Pré-requisitos
 
 - JDK 17 ou superior, com `java` disponível no terminal.
